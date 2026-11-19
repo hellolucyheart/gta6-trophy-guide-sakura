@@ -3,12 +3,12 @@
 // kind and grade, a spoiler setting, a roadmap view and a detail panel.
 // The app loads only its own files: the trophy data comes from
 // data/trophies.json, fetched relative to this page. No network at runtime.
-const KEY = 'gta6-trophy-guide-sakura-v1';
-const params = new URLSearchParams(location.search);
+const STORAGE_KEY = 'gta6-trophy-guide-sakura-v1';
+const query = new URLSearchParams(location.search);
 const doc = await (await fetch('data/trophies.json')).json();
 const trophies = doc.trophies;
 const sourceDir = doc.sources || {};
-const byId = new Map(trophies.map((t) => [t.id, t]));
+const trophyById = new Map(trophies.map((t) => [t.id, t]));
 
 const KIND_LABELS = {
   story: 'Story',
@@ -38,11 +38,11 @@ const detailBody = document.getElementById('detailBody');
 const detailCloseBtn = document.getElementById('detailClose');
 
 let earned = new Set();
-try { earned = new Set(JSON.parse(localStorage.getItem(KEY) ?? '[]')); } catch { earned = new Set(); }
-earned = new Set([...earned].filter((id) => byId.has(Number(id))).map(Number));
+try { earned = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')); } catch { earned = new Set(); }
+earned = new Set([...earned].filter((id) => trophyById.has(Number(id))).map(Number));
 
-function save() {
-  localStorage.setItem(KEY, JSON.stringify([...earned].sort((a, b) => a - b)));
+function persist() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify([...earned].sort((a, b) => a - b)));
 }
 
 function spoilerHidden(t) {
@@ -60,7 +60,7 @@ function isShown(t) {
   return true;
 }
 
-function badge(t) {
+function buildBadge(t) {
   const wrap = document.createElement('span');
   wrap.className = 'badges';
   const g = document.createElement('span');
@@ -100,8 +100,8 @@ function renderList() {
     box.setAttribute('aria-label', `Mark ${t.name} earned`);
     box.addEventListener('change', () => {
       if (box.checked) earned.add(t.id); else earned.delete(t.id);
-      save();
-      renderAll();
+      persist();
+      refreshAll();
     });
     li.append(box);
     const body = document.createElement('div');
@@ -126,7 +126,7 @@ function renderList() {
     }
     body.append(guide);
     li.append(body);
-    li.append(badge(t));
+    li.append(buildBadge(t));
     li.tabIndex = 0;
     li.setAttribute('role', 'button');
     li.setAttribute('aria-label', `Open details for ${spoilerHidden(t) ? 'hidden story trophy' : t.name}`);
@@ -153,9 +153,10 @@ function renderProgress() {
   document.getElementById('progressFill').style.width = `${pct}%`;
   document.getElementById('progressBar').setAttribute('aria-valuenow', String(n));
   document.getElementById('percent').textContent = `${pct}%`;
+  const remaining = trophies.length - n - (earned.has(1) ? 0 : 1);
   document.getElementById('platinumNote').textContent = earned.has(1)
     ? 'Platinum: Vice Got a Price! — earned!'
-    : `Platinum: Vice Got a Price! — ${54 - (n - (earned.has(1) ? 1 : 0))} to go`;
+    : `Platinum: Vice Got a Price! — ${remaining} more to go`;
 }
 
 function renderRoadmap() {
@@ -197,20 +198,20 @@ function renderSources() {
   });
 }
 
-function renderAll() {
+function refreshAll() {
   renderProgress();
   renderList();
   renderRoadmap();
 }
 
 function openDetail(id) {
-  const t = byId.get(Number(id));
+  const t = trophyById.get(Number(id));
   if (!t) return;
   detailBody.replaceChildren();
   const h = document.createElement('h2');
   h.textContent = spoilerHidden(t) ? 'Hidden story trophy' : t.name;
   detailBody.append(h);
-  detailBody.append(badge(t));
+  detailBody.append(buildBadge(t));
   const official = document.createElement('p');
   official.className = 'official';
   official.textContent = spoilerHidden(t)
@@ -258,8 +259,8 @@ function openDetail(id) {
   toggle.textContent = earned.has(t.id) ? 'Mark as not earned' : 'Mark as earned';
   toggle.addEventListener('click', () => {
     if (earned.has(t.id)) earned.delete(t.id); else earned.add(t.id);
-    save();
-    renderAll();
+    persist();
+    refreshAll();
     openDetail(t.id);
   });
   detailBody.append(toggle);
@@ -306,10 +307,10 @@ document.getElementById('import').addEventListener('change', async (event) => {
   try {
     const data = JSON.parse(await file.text());
     const ids = Array.isArray(data) ? data : data.earned;
-    const next = new Set(ids.filter((id) => byId.has(Number(id))).map(Number));
+    const next = new Set(ids.filter((id) => trophyById.has(Number(id))).map(Number));
     earned = next;
-    save();
-    renderAll();
+    persist();
+    refreshAll();
   } catch {
     alert('That file is not a trophy-progress export from this guide.');
   }
@@ -317,13 +318,14 @@ document.getElementById('import').addEventListener('change', async (event) => {
 });
 
 // Deep links, used by the guide's own screenshots and by readers:
-// ?view=roadmap, ?kind=story, ?grade=silver, ?spoiler=on, ?open=<trophy id>
-if (params.get('view') === 'roadmap') setView('roadmap');
-if (params.get('kind')) kindEl.value = params.get('kind');
-if (params.get('grade')) gradeEl.value = params.get('grade');
-if (params.get('spoiler') === 'on') spoilerEl.checked = true;
-if (params.get('q')) searchEl.value = params.get('q');
+// ?view=roadmap, ?kind=story, ?grade=silver, ?spoiler=on, ?hideEarned=1, ?open=<trophy id>
+if (query.get('view') === 'roadmap') setView('roadmap');
+if (query.get('kind')) kindEl.value = query.get('kind');
+if (query.get('grade')) gradeEl.value = query.get('grade');
+if (query.get('spoiler') === 'on') spoilerEl.checked = true;
+if (query.get('hideEarned') === '1') hideEarnedEl.checked = true;
+if (query.get('q')) searchEl.value = query.get('q');
 
 renderSources();
-renderAll();
-if (params.get('open')) openDetail(params.get('open'));
+refreshAll();
+if (query.get('open')) openDetail(query.get('open'));
