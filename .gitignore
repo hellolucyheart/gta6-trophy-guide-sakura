@@ -1,7 +1,1 @@
-# Leonida Trophy Guide — files that stay out of the repo.
-# main.ts writes its graded dossier into out/ on every run, so the
-# directory is generated output, not source, and never gets committed.
 out/
-
-# If local tooling is ever added, its packages stay out too.
-node_modules/

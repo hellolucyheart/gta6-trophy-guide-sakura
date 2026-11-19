@@ -1,52 +1,49 @@
-// Leonida Trophy Guide — the entry program (Node 22, standard library only).
-//
-// The guide itself is plain static files under app/: index.html, style.css,
-// app.js and data/trophies.json, with no build step and no network at run
-// time. This program is what hands the guide in: it copies app/ and
-// screenshots/ from beside this file into the output directory and writes
-// dossier.json there with the vendored make.fun library — the summary the
-// judge reads (the screenshots, the first load's files and bytes, and the
-// source outline).
-//
-// vendor/makefun-frontend.ts stays exactly as the kit shipped it: the gate
-// rebuilds the dossier with its own copy and compares the two byte for byte,
-// so any change there would fail the entry.
-//
-// Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
-//   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
-//
-// The program runs twice in grading and both runs must write the same bytes,
-// so it writes nothing time-dependent and copies files exactly as they are.
-// Screenshots are regenerated fresh for each rebuild with a new earned-trophy
-// seed (see shots.json and the shots.mjs work script), so the images in the
-// dossier always match the current build rather than an older one.
+/* Leonida Trophy Guide — entrypoint.
+   Copies app/ and screenshots/ from this repository into the output
+   directory and writes dossier.json with the kit library. Runs the
+   same way twice and produces identical bytes both times. */
+import { cpSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { join, resolve } from "node:path";
+import { buildDossier } from "./vendor/makefun-frontend.ts";
 
-import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { buildDossier } from './vendor/makefun-frontend.ts';
+const repoRoot = resolve(".");
+const outDir = resolve(process.env.MAKEFUN_OUTPUT_DIR ?? "/output");
 
-const repoRoot = fileURLToPath(new URL('.', import.meta.url));
-const outputDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
-
-mkdirSync(outputDir, { recursive: true });
-cpSync(join(repoRoot, 'app'), join(outputDir, 'app'), { recursive: true });
-mkdirSync(join(outputDir, 'screenshots'), { recursive: true });
-if (existsSync(join(repoRoot, 'screenshots'))) {
-  cpSync(join(repoRoot, 'screenshots'), join(outputDir, 'screenshots'), { recursive: true });
+function wipeDir(path: string): void {
+  rmSync(path, { force: true, recursive: true });
+  mkdirSync(path, { recursive: true });
 }
 
-// The scorer's caps, from the kit's gate: at most 4 screenshots, each at most
-// 256 KiB; at most 993 files and directories in app/ and 48 MiB of app files
-// in all; the dossier text is capped at 160 KiB. The library enforces them
-// and refuses an entry that would break them, so a bad build fails here
-// loudly instead of passing a broken dossier to the judge.
-writeFileSync(
-  join(outputDir, 'dossier.json'),
-  buildDossier(outputDir, {
-    text_max_bytes: 163840,
-    screenshots: { max: 4, max_bytes: 262144 },
-    app_max_files: 993,
-    app_max_bytes: 50331648,
-  }),
-);
+function listFilesSorted(dir: string): string[] {
+  const names = readdirSync(dir).sort();
+  const found: string[] = [];
+  for (const name of names) {
+    const full = join(dir, name);
+    if (statSync(full).isDirectory()) {
+      found.push(...listFilesSorted(full));
+    } else {
+      found.push(full);
+    }
+  }
+  return found;
+}
+
+function copyTreeInto(srcDir: string, destDir: string): void {
+  const files = listFilesSorted(srcDir);
+  for (const file of files) {
+    const rel = file.slice(srcDir.length + 1);
+    const target = join(destDir, rel);
+    mkdirSync(join(target, ".."), { recursive: true });
+    cpSync(file, target);
+  }
+}
+
+wipeDir(outDir);
+mkdirSync(join(outDir, "app"), { recursive: true });
+mkdirSync(join(outDir, "screenshots"), { recursive: true });
+copyTreeInto(join(repoRoot, "app"), join(outDir, "app"));
+copyTreeInto(join(repoRoot, "screenshots"), join(outDir, "screenshots"));
+
+const dossier = buildDossier(outDir, { text_max_bytes: 163840 });
+writeFileSync(join(outDir, "dossier.json"), dossier);
+console.log("wrote dossier.json (" + dossier.length + " bytes) to " + outDir);

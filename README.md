@@ -4,28 +4,16 @@
 [![rank](https://make.fun/badge/gta6-trophy-guide-01/hellolucyheart/gta6-trophy-guide-sakura/rank.svg)](https://make.fun/bounty/gta6-trophy-guide-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-trophy-guide-01)
 [![reward](https://make.fun/badge/gta6-trophy-guide-01/hellolucyheart/gta6-trophy-guide-sakura/reward.svg)](https://make.fun/bounty/gta6-trophy-guide-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-trophy-guide-01)
 
-Leonida Trophy Guide — an offline GTA VI trophy guide and progress tracker covering all 55 PlayStation 5 trophies. What it gives you:
-
-- A checklist of every trophy, with your progress saved in the browser (localStorage), so it keeps working with the network off.
-- A guide for each trophy, written in this entry's own words and citing its sources — trophy names, descriptions and grades are shown exactly as PlayStation publishes them.
-- Search across names, descriptions and guides, filters by kind and grade, export/import of your progress, a hide-earned toggle, and a spoiler setting that hides story trophy names until you earn them.
-- A five-stage roadmap to the platinum, with the one possibly-missable trophy clearly flagged.
+Leonida Trophy Guide is an offline web guide and tracker for all 55 PlayStation 5 trophies of Grand Theft Auto VI. Every trophy is shown with its official name, description and grade, plus a guide written for this entry in our own words that names its source. A four-stage roadmap leads to the platinum, the three missable trophies are flagged with why they can be missed, and the checklist saves progress in the browser, exports it to a file and imports it back. Filters cover story, missions, activities, collectibles, combat, exploration, economy, social and missable trophies, and a spoiler-safe mode hides story and mission names until they are earned. It is plain static files under `app/` — no build step, no network at runtime, no official artwork.
 
 ## Run it
 
 ```sh
+MAKEFUN_OUTPUT_DIR=out node main.ts
 node serve.ts
 ```
 
-Then open http://localhost:8080 in desktop Chrome. The guide only loads its own files, so it works with the network off.
-
-Or hand it in the way the bounty grades it:
-
-```sh
-mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
-```
-
-That writes `out/dossier.json`, the summary the judge reads.
+`main.ts` copies `app/` and `screenshots/` into the output directory and writes `dossier.json`. `serve.ts` serves `app/` on http://localhost:8080 so you can open the guide in a desktop browser.
 
 ---
 

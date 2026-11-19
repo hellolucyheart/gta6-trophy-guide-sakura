@@ -4,83 +4,57 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Leonida Trophy Guide — GTA VI (PS5)</title>
-<meta name="description" content="An offline GTA VI trophy guide and tracker for all 55 PlayStation 5 trophies: a checklist, guides written in our own words with sources, and a five-stage roadmap to the platinum.">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="top">
-  <div>
-    <p class="eyebrow">Grand Theft Auto VI &middot; PlayStation 5 &middot; 55 trophies</p>
-    <h1>Leonida Trophy Guide</h1>
-    <p class="tagline">Every trophy, its official description, a guide in our own words with sources — plus a tracker that remembers your progress offline.</p>
+<header class="masthead">
+  <p class="eyebrow">Grand Theft Auto VI &middot; PlayStation 5 &middot; 55 trophies</p>
+  <h1>Leonida Trophy Guide</h1>
+  <p class="tagline">Every trophy, a roadmap to the platinum, and a tracker that remembers your progress — fully offline.</p>
+  <div class="progress-wrap" aria-label="Trophy progress">
+    <div class="progress-line"><span id="progressText">0 of 55 earned</span><span id="gradeText"></span></div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
   </div>
-  <div class="progress-card" id="progressCard">
-    <p class="big"><span id="earnedCount">0</span> / 55 earned</p>
-    <div class="bar" role="progressbar" aria-label="Trophies earned" aria-valuemin="0" aria-valuemax="55" aria-valuenow="0" id="progressBar"><div class="fill" id="progressFill" style="width:0%"></div></div>
-    <p class="sub"><span id="percent">0%</span> &middot; <span id="platinumNote">Platinum: Vice Got a Price! — not yet</span></p>
+  <div class="toolbar">
+    <label class="search-label">Search <input id="searchBox" type="search" placeholder="Search name or description…" autocomplete="off"></label>
+    <label class="spoiler-label"><input id="spoilerToggle" type="checkbox"> Spoiler-safe mode</label>
+    <button id="exportBtn" type="button">Export progress</button>
+    <button id="importBtn" type="button">Import progress</button>
+    <input id="importFile" type="file" accept="application/json,.json" hidden>
+    <button id="resetBtn" type="button">Reset</button>
   </div>
+  <div class="filters" id="filterRow" role="group" aria-label="Filter trophies"></div>
+  <p class="hint">Spoiler-safe mode hides the names and descriptions of story and mission trophies until you earn them. Progress is saved in this browser only.</p>
 </header>
 
-<nav class="views" aria-label="Views">
-  <button type="button" data-view="checklist" class="active" id="tabChecklist" aria-current="true">Checklist</button>
-  <button type="button" data-view="roadmap" id="tabRoadmap">Roadmap to Platinum</button>
-</nav>
+<main>
+  <section id="roadmap" class="roadmap" aria-labelledby="roadmapTitle">
+    <h2 id="roadmapTitle">Roadmap to the platinum</h2>
+    <p class="roadmap-intro">Play in this order. Stages 1 and 2 are the story and the people of Leonida; stage 3 is the long grind; stage 4 is the finish line. Only three trophies can be missed — all three are flagged below and in the checklist.</p>
+    <div id="roadmapStages" class="stages"></div>
+    <div class="missable-note">
+      <h3>How missables are decided</h3>
+      <p>A trophy is flagged missable only where the official description itself names a condition that can be passed or a choice that can lock it. That gives exactly three: <strong>Actions Speak Louder</strong> (choices can lock other paths), <strong>Bad Luck, I Guess</strong> (it needs a failed first attempt — succeeding first try may skip it), and <strong>The Truth Is Out There</strong> (a one-off strange event). Everything else is repeatable in the open world or earned by story progress, and story trophies are never flagged missable.</p>
+    </div>
+  </section>
 
-<section id="viewChecklist" class="view">
-  <div class="controls">
-    <label>Search <input id="search" type="search" placeholder="Trophy name or a word from a guide…" autocomplete="off" aria-label="Search trophies by name or guide word"></label>
-    <label>Kind
-      <select id="kind">
-        <option value="all">All kinds</option>
-        <option value="story">Story</option>
-        <option value="missable">Missable</option>
-        <option value="collectibles">Collectibles</option>
-        <option value="activities">Activities</option>
-        <option value="completion">100% completion</option>
-        <option value="platinum">Platinum</option>
-        <option value="online">Online</option>
-      </select>
-    </label>
-    <label>Grade
-      <select id="grade">
-        <option value="all">All grades</option>
-        <option value="platinum">Platinum</option>
-        <option value="gold">Gold</option>
-        <option value="silver">Silver</option>
-        <option value="bronze">Bronze</option>
-      </select>
-    </label>
-    <label class="check"><input id="spoiler" type="checkbox"> Spoiler-safe: hide story names</label>
-    <label class="check"><input id="hideEarned" type="checkbox"> Hide earned</label>
-    <button id="export" type="button">Export progress</button>
-    <label class="import">Import progress <input id="import" type="file" accept="application/json,.json"></label>
-  </div>
-  <p class="hint" id="onlineNote" hidden>There are no online trophies in this list — all 55 are single-player and offline. (Source: launch coverage of the 18 Nov 2026 list.)</p>
-  <p class="count" id="shownCount" aria-live="polite"></p>
-  <ul class="trophies" id="list"></ul>
-</section>
+  <section class="tracker" aria-labelledby="trackerTitle">
+    <h2 id="trackerTitle">Trophy checklist</h2>
+    <p id="resultCount" class="result-count"></p>
+    <ul id="trophyList" class="trophy-list"></ul>
+    <p id="emptyNote" class="empty-note" hidden>No trophies match this filter and search.</p>
+  </section>
 
-<section id="viewRoadmap" class="view" hidden>
-  <h2>Roadmap to the Platinum</h2>
-  <p class="lede">One playthrough, no mission replay, no New Game Plus — so the order matters. Keep a <strong>manual save at the start of every chapter</strong> and one before the final mission: it is your only way back. Work the five stages in order; the tracker above ticks off as you go.</p>
-  <div class="stages" id="stages"></div>
-  <div class="warning">
-    <h3>The one missable trophy</h3>
-    <p><strong>Positive Mental Attitude</strong> is the only trophy launch coverage flags as possibly missable: one meditation spot — Lucia's balcony in Chapter 1 — is reported to disappear after that chapter. Meditate there during Chapter 1, before the chapter ends. Every other trophy is earned in free roam or by finishing missions, so nothing else in the list is reported missable at launch — but with no mission replay, the chapter-start saves are still your safety net.</p>
-  </div>
-</section>
-
-<aside class="detail" id="detail" hidden role="dialog" aria-label="Trophy details">
-  <button type="button" id="detailClose" aria-label="Close details">&times;</button>
-  <div id="detailBody"></div>
-</aside>
+  <aside id="detailPanel" class="detail" aria-live="polite" hidden>
+    <button id="detailClose" type="button" class="detail-close">Close ✕</button>
+    <div id="detailBody"></div>
+  </aside>
+</main>
 
 <footer>
-  <h2>Sources &amp; honesty note</h2>
-  <p>Names, descriptions and grades are the official PlayStation list as published on Exophase and PSNProfiles on 18 November 2026 (55 trophies: 1 platinum, 2 gold, 6 silver, 46 bronze; 28 hidden until earned). Every guide is written for this entry, in its own words, and cites its sources beside it — a source is cited, never copied. Where no source had confirmed a method at launch, the guide says so instead of guessing. Launch coverage used: <span id="sourceList"></span></p>
-  <p class="small">Fan-made guide. Not affiliated with Rockstar Games or Sony. No Rockstar logo, artwork or game screenshots are used anywhere in this guide.</p>
+  <p>Names, descriptions and grades are the official PlayStation trophy list. Guides are written for this entry in our own words, built only from the official descriptions, and each one names its source. No official artwork, logos or game screenshots are used.</p>
+  <p>Sources named in this guide: Official trophy description — PlayStation (as listed by Exophase and PSNProfiles).</p>
 </footer>
-
-<script type="module" src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
