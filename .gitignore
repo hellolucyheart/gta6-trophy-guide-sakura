@@ -1,1 +1,5 @@
+# Build outputs stay out of the repo: main.ts writes the graded dossier here.
 out/
+
+# Local tooling, if any is ever added.
+node_modules/

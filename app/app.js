@@ -35,6 +35,7 @@ const spoilerEl = document.getElementById('spoiler');
 const hideEarnedEl = document.getElementById('hideEarned');
 const detailEl = document.getElementById('detail');
 const detailBody = document.getElementById('detailBody');
+const detailCloseBtn = document.getElementById('detailClose');
 
 let earned = new Set();
 try { earned = new Set(JSON.parse(localStorage.getItem(KEY) ?? '[]')); } catch { earned = new Set(); }
@@ -126,9 +127,18 @@ function renderList() {
     body.append(guide);
     li.append(body);
     li.append(badge(t));
+    li.tabIndex = 0;
+    li.setAttribute('role', 'button');
+    li.setAttribute('aria-label', `Open details for ${spoilerHidden(t) ? 'hidden story trophy' : t.name}`);
     li.addEventListener('click', (event) => {
       if (event.target === box) return;
       openDetail(t.id);
+    });
+    li.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openDetail(t.id);
+      }
     });
     listEl.append(li);
   }
@@ -138,9 +148,11 @@ function renderList() {
 
 function renderProgress() {
   const n = earned.size;
+  const pct = Math.round((n / trophies.length) * 100);
   document.getElementById('earnedCount').textContent = String(n);
-  document.getElementById('progressFill').style.width = `${Math.round((n / trophies.length) * 100)}%`;
-  document.getElementById('percent').textContent = `${Math.round((n / trophies.length) * 100)}%`;
+  document.getElementById('progressFill').style.width = `${pct}%`;
+  document.getElementById('progressBar').setAttribute('aria-valuenow', String(n));
+  document.getElementById('percent').textContent = `${pct}%`;
   document.getElementById('platinumNote').textContent = earned.has(1)
     ? 'Platinum: Vice Got a Price! — earned!'
     : `Platinum: Vice Got a Price! — ${54 - (n - (earned.has(1) ? 1 : 0))} to go`;
@@ -252,9 +264,17 @@ function openDetail(id) {
   });
   detailBody.append(toggle);
   detailEl.hidden = false;
+  detailCloseBtn.focus();
 }
 
-document.getElementById('detailClose').addEventListener('click', () => { detailEl.hidden = true; });
+function closeDetail() {
+  detailEl.hidden = true;
+}
+
+detailCloseBtn.addEventListener('click', closeDetail);
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && !detailEl.hidden) closeDetail();
+});
 
 function setView(view) {
   const roadmap = view === 'roadmap';
@@ -262,6 +282,8 @@ function setView(view) {
   document.getElementById('viewChecklist').hidden = roadmap;
   document.getElementById('tabRoadmap').classList.toggle('active', roadmap);
   document.getElementById('tabChecklist').classList.toggle('active', !roadmap);
+  document.getElementById('tabRoadmap').toggleAttribute('aria-current', roadmap);
+  document.getElementById('tabChecklist').toggleAttribute('aria-current', !roadmap);
 }
 document.getElementById('tabChecklist').addEventListener('click', () => setView('checklist'));
 document.getElementById('tabRoadmap').addEventListener('click', () => setView('roadmap'));

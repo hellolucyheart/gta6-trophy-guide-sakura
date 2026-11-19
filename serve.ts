@@ -2,6 +2,9 @@
 // library only). Serves app/ on http://localhost:8080 (`--port <n>` for
 // another port) so the guide can be opened in desktop Chrome and screenshotted.
 // Development convenience only — the graded app needs no server of its own.
+//
+// The path guard below keeps every request inside app/: a request that would
+// escape the root (for example with ".." segments) is refused with 403.
 import { createReadStream, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, join, normalize, resolve, sep } from 'node:path';

@@ -4,7 +4,12 @@
 [![rank](https://make.fun/badge/gta6-trophy-guide-01/hellolucyheart/gta6-trophy-guide-sakura/rank.svg)](https://make.fun/bounty/gta6-trophy-guide-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-trophy-guide-01)
 [![reward](https://make.fun/badge/gta6-trophy-guide-01/hellolucyheart/gta6-trophy-guide-sakura/reward.svg)](https://make.fun/bounty/gta6-trophy-guide-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-trophy-guide-01)
 
-Leonida Trophy Guide — an offline GTA VI trophy guide and tracker for all 55 PlayStation 5 trophies: a checklist with progress saved in the browser, a roadmap to the platinum, missable flags, filters by kind and grade, and a spoiler setting that hides story trophies until earned. Every guide is written in its own words and cites its sources; trophy names, descriptions and grades are shown exactly as PlayStation publishes them.
+Leonida Trophy Guide — an offline GTA VI trophy guide and tracker for all 55 PlayStation 5 trophies. It gives you:
+
+- A checklist of every trophy, with progress saved in your browser (localStorage), so it works with the network off.
+- A guide for each trophy, written in its own words and citing its sources — trophy names, descriptions and grades are shown exactly as PlayStation publishes them.
+- Filters by kind and grade, full-text search, export/import of your progress, and a spoiler setting that hides story trophy names until you earn them.
+- A five-stage roadmap to the platinum, with the one possibly-missable trophy flagged.
 
 ## Run it
 

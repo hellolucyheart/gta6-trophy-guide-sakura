@@ -9,7 +9,7 @@
 //
 // vendor/makefun-frontend.ts stays exactly as the kit shipped it: the gate
 // rebuilds the dossier with its own copy and compares the two byte for byte,
-// so any change here would fail the entry.
+// so any change there would fail the entry.
 //
 // Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
